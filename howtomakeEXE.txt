@@ -1,0 +1,37 @@
+To make the `gui.py` file executable, you can create an executable script or binary from it using a tool like `pyinstaller`. Here's how you can do it:
+
+1. Install `pyinstaller` (if you haven't already):
+
+   You can install `pyinstaller` using `pip`:
+
+   ```bash
+   pip install pyinstaller
+   ```
+
+2. Navigate to the directory where your `gui.py` file is located using the terminal.
+
+3. Use `pyinstaller` to create an executable:
+
+   Run the following command to create an executable binary from your `gui.py` script:
+
+   ```bash
+   pyinstaller --onefile gui.py
+   ```
+
+   This command will generate a `dist` directory within your project folder, and inside it, you'll find an executable file named `gui`.
+
+4. Run the executable:
+
+   You can now run the executable directly, and it will launch your GUI application:
+
+   On Windows:
+   ```bash
+   .\dist\gui.exe
+   ```
+
+   On macOS or Linux:
+   ```bash
+   ./dist/gui
+   ```
+
+Your `gui.py` script is now bundled into an executable that can be easily distributed and run on compatible systems.
