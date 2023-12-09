@@ -1,5 +1,5 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QTableWidget, QTableWidgetItem
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QTableWidget, QTableWidgetItem, QInputDialog
 import main
 import warnings
 
@@ -19,8 +19,8 @@ class StudentInformationSystem(QMainWindow):
 
         # Create a table to display student records
         self.student_table = QTableWidget(self)
-        self.student_table.setColumnCount(5)
-        self.student_table.setHorizontalHeaderLabels(["Student ID", "Name", "Age", "Sign-up Date", "Lessons Listened"])
+        self.student_table.setColumnCount(6)
+        self.student_table.setHorizontalHeaderLabels(["Student ID", "Name", "Age", "Sign-up Date", "Lessons Listened","Baptism Date (est.)"])
         self.student_table.setEditTriggers(QTableWidget.DoubleClicked)
 
         # Create input fields
@@ -28,7 +28,7 @@ class StudentInformationSystem(QMainWindow):
         self.name_edit = QLineEdit()
         self.age_label = QLabel("Age:")
         self.age_edit = QLineEdit()
-        self.signup_label = QLabel("Sign-up Date:")
+        self.signup_label = QLabel("Sign-up Date (YYYY-MM-DD):")
         self.signup_edit = QLineEdit()
         self.lessons_label = QLabel("Lessons Listened:")
         self.lessons_edit = QLineEdit()
@@ -67,8 +67,8 @@ class StudentInformationSystem(QMainWindow):
         try:
             name = self.name_edit.text()
             age = int(self.age_edit.text())
-            signup_date = input("Enter Sign-up Date (YYYY-MM-DD): ")
-            lessons = int(self.lessons_edit.text())  
+            signup_date = self.signup_edit.text()
+            lessons = int(self.lessons_edit.text())
 
             main.create_student(name, age, signup_date, lessons)
             self.update_student_table()
@@ -113,4 +113,4 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = StudentInformationSystem()
     window.show()
-    app.exec_()
+    sys.exit(app.exec_())

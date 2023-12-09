@@ -1,8 +1,23 @@
 import sqlite3
+import datetime
 
 # Connect to an SQLite database (or create it if it doesn't exist)
 db = sqlite3.connect('student_database.sqlite')
 cursor = db.cursor()
+
+def calculate_baptism_date(signup_date, lessons_listened):
+    # Convert the signup_date to a datetime object
+    signup_date_obj = datetime.datetime.strptime(signup_date, "%Y-%m-%d")
+
+    # Add 6 months to the signup_date
+    estimated_baptism_date = signup_date_obj + datetime.timedelta(days=180)
+
+    # Add additional days based on the number of lessons listened (maximum 28 lessons)
+    additional_days = min(lessons_listened, 28)
+    estimated_baptism_date += datetime.timedelta(days=additional_days)
+
+    return estimated_baptism_date.strftime("%Y-%m-%d")
+
 
 # Create the 'students' table if it doesn't exist
 def create_table():
@@ -12,7 +27,8 @@ def create_table():
         name TEXT NOT NULL,
         age INTEGER,
         signup_date TEXT,
-        lessons INTEGER   
+        lessons INTEGER,
+        estbaptism_date TEXT
     )
     ''')
     db.commit()
@@ -22,10 +38,23 @@ create_table()
 
 # Create a new student record
 def create_student(name, age, signup_date, lessons):
-    sql = "INSERT INTO students (name, age, year, signup_date, lessons) VALUES (?, ?, ?, ?, ?)"
-    values = (name, age, signup_date, lessons)
-    cursor.execute(sql, values)
-    db.commit()
+    try:
+        sql = "INSERT INTO students (name, age, signup_date, lessons, estbaptism_date) VALUES (?, ?, ?, ?, NULL)"
+        values = (name, age, signup_date, lessons)
+        cursor.execute(sql, values)
+
+        # Calculate the estimated baptism date
+        baptism_date = calculate_baptism_date(signup_date, lessons)
+
+        # Update the record with the calculated baptism date
+        update_baptism_date_sql = "UPDATE students SET estbaptism_date = ? WHERE id = ?"
+        update_baptism_date_values = (baptism_date, cursor.lastrowid)
+        cursor.execute(update_baptism_date_sql, update_baptism_date_values)
+
+        db.commit()
+    except Exception as e:
+        print(f"Error in create_student: {e}")
+
 
 
 # Read all student records
@@ -37,10 +66,22 @@ def read_students():
 
 # Update a student record
 def update_student(student_id, name, age, signup_date, lessons):
-    sql = "UPDATE students SET name = ?, age = ?, signup_date = ? WHERE id = ? lessons = ?"
-    values = (name, age, signup_date, lessons, student_id)
-    cursor.execute(sql, values)
-    db.commit()
+    try:
+        # Update student information
+        update_sql = "UPDATE students SET name = ?, age = ?, signup_date = ?, lessons_listened = ? WHERE id = ?"
+        update_values = (name, age, signup_date, lessons, student_id)
+        cursor.execute(update_sql, update_values)
+
+        # Update estimated baptism date
+        baptism_date = calculate_baptism_date(signup_date, lessons)
+        update_baptism_date_sql = "UPDATE students SET estimated_baptism_date = ? WHERE id = ?"
+        update_baptism_date_values = (baptism_date, student_id)
+        cursor.execute(update_baptism_date_sql, update_baptism_date_values)
+
+        db.commit()
+    except Exception as e:
+        print(f"Error in update_student: {e}")
+
 
 
 # Delete a student record
@@ -51,36 +92,4 @@ def delete_student(student_id):
     db.commit()
 
 if __name__ == "__main__":
-    while True:
-        print("\nStudent Database Operations:")
-        print("1. Create Student")
-        print("2. Read Students")
-        print("3. Update Student")
-        print("4. Delete Student")
-        print("5. Exit")
-
-        choice = input("Enter your choice (1/2/3/4/5): ")
-
-        if choice == '1':
-            name = input("Enter student name: ")
-            age = int(input("Enter student age: "))
-            year = float(input("Enter student year: "))
-            create_student(name, age, year)
-        elif choice == '2':
-            read_students()
-        elif choice == '3':
-            student_id = int(input("Enter student ID to update: "))
-            name = input("Enter updated name: ")
-            age = int(input("Enter updated age: "))
-            year = float(input("Enter updated year: "))
-            update_student(student_id, name, age, year)
-        elif choice == '4':
-            student_id = int(input("Enter student ID to delete: "))
-            delete_student(student_id)
-        elif choice == '5':
-            break
-        else:
-            print("Invalid choice. Please choose a valid option.")
-
-    # Close the database connection
-    db.close()
+    create_table()
